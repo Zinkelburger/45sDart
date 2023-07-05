@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'deck.dart';
 import 'player.dart';
 import 'card.dart';
@@ -7,11 +5,16 @@ import 'suit.dart';
 import 'pair.dart';
 
 class X45s {
-  final List<Player> players = [];
-  final Deck deck = Deck();
-  final List<int> playerScores = [0, 0];
+  List<Player> players = [];
+  Deck deck = Deck();
+  List<int> playerScores = [0, 0];
+  List<int> playerScoresThisHand = [0, 0];
+  List<int> bidHistory = [];
   int playerDealing = 0;
-  bool initalizedPlayersWithNew = false;
+  int? bidAmount = null;
+  int? bidder = null;
+  Suit trump = Suit.INVALID;
+  Suit suitLed = Suit.INVALID;
 
   X45s(Player p1, Player p2, Player p3, Player p4) {
     players.addAll([p1, p2, p3, p4]);
@@ -23,7 +26,6 @@ class X45s {
       Player Function() cp2,
       Player Function() cp3,
       Player Function() cp4) {
-    initalizedPlayersWithNew = true;
     players.addAll([cp1(), cp2(), cp3(), cp4()]);
     playerDealing = 0;
   }
@@ -41,23 +43,24 @@ class X45s {
     }
   }
 
-  void dealKiddie(int winner) {
-    if (winner < 0 || winner > 3) {
+  void dealKiddie() {
+    if (bidder! < 0 || bidder! > 3 || bidder == null) {
       throw ArgumentError(
           'Invalid winner of bid. Needs to be player 0, 1, 2, or 3');
     }
+    // deal 3 cards to the player who won the kiddie
     for (int i = 0; i < 3; i++) {
-      players[winner].dealCard(deck.popBack());
+      players[bidder!].dealCard(deck.popBack());
     }
   }
 
   Card evaluateTrick(Card card1, Card card2, Card card3, Card card4) {
     final cards = [card1, card2, card3, card4];
-    return cards.reduce((value, element) => max(value, element));
+    return cards.reduce((value, element) => value.lessThan(element, suitLed, trump) ? value : element);
   }
 
   Card evaluateTrickList(List<Card> cards) {
-    return cards.reduce((value, element) => max(value, element));
+    return cards.reduce((value, element) => value.lessThan(element, suitLed, trump) ? value : element);
   }
 
   void updateScores(int player) {
@@ -76,54 +79,49 @@ class X45s {
     return playerScores[player];
   }
 
-  bool hasWon() => playerScores[0] >=120 || playerScores[1] >=120;
+  bool hasWon() => playerScores[0] >=120 || playerScores[1] >= 120;
 
-  int getBidAmount() => bidAmount;
+  int? getBidAmount() => bidAmount;
 
   Pair<int, bool> dealBidAndFullFiveTricks() {
     dealPlayers();
 
-    final bidder = getBidder();
-    setBid(bidAmount, bidder);
-
-    final gameState = GameState.instance;
-    gameState.setTrump(getBidSuit());
-
-    dealKiddie(bidder);
+    getBidder();
+    dealKiddie();
+  
     havePlayersDiscard();
 
     dealPlayers();
 
-    var firstPlayer = bidder + 1;
-    Pair<Card, int> highCard;
+    // (Card, player)
+    Pair<Card, int> highCard = Pair(Card(), -1000);
 
+    int trickWinner = bidder!;
+    // all 5 tricks
     for (int i = 0; i < 5; i++) {
-      final winnerAndCard = havePlayersPlayCardsAndEvaluate(firstPlayer);
-      firstPlayer = winnerAndCard.second;
+      final winnerAndCard = havePlayersPlayCardsAndEvaluate(trickWinner);
+      trickWinner = winnerAndCard.second;
 
-      if (winnerAndCard.first > highCard.first || i == 0) {
+      // if the winning card is bigger than the high card, set the high card to the winning card
+      if (i == 0 || highCard.first.lessThan(winnerAndCard.first, suitLed, trump)) {
         highCard = winnerAndCard;
       }
     }
 
     updateScores(highCard.second % 2);
 
-    return Pair(bidder, determineIfWonBidAndDeduct());
+    return Pair(bidder!, determineIfWonBidAndDeduct());
   }
 
-  void setBid(int bid, int bidderNum) {
-    bidAmount = bid;
-    bidder = bidderNum;
-    bidderInitialScore = playerScores[bidder];
-  }
-
-  int getBidder() {
+  // gets the bids of all 4 players. If none bid, then bag the dealer
+  // postconditions: playerDealing is incremented. bidAmount, trump, and bidder are set.
+  void getBidder() {
     bidHistory.clear();
     Pair<int, Suit> currentBid;
-    var maxBid = Pair<int, Suit>(-2147483648, Suit.ACE_OF_HEARTS);
-    var firstPlayer = -1;
+    var maxBid = Pair<int, Suit>(0, Suit.INVALID);
+    int? firstPlayer = null;
 
-    for (int i = playerDealing + 1; i < playerDealing + 4; i++) {
+    for (int i = playerDealing; i < playerDealing + 3; i++) {
       currentBid = players[i % 4].getBid(bidHistory);
       if (currentBid.first != 0) {
         bidHistory.add(currentBid.first);
@@ -134,34 +132,32 @@ class X45s {
       }
     }
 
+    // bags the dealer in this case
     if (maxBid.first <= 0) {
-      currentBid.second = players[playerDealing].bagged();
+      currentBid = Pair(15, players[playerDealing].bagged());
       firstPlayer = playerDealing;
-    } else {
-      currentBid = players[playerDealing].getBid(bidHistory);
-      if (currentBid.first != 0) {
-        bidHistory.add(currentBid.first);
-        if (currentBid.first > maxBid.first) {
-          maxBid = currentBid;
-          firstPlayer = playerDealing;
-        }
-      }
     }
 
     playerDealing++;
     playerDealing %= 4;
 
     bidAmount = maxBid.first;
-    bidSuit = maxBid.second;
-
-    return firstPlayer;
+    trump = maxBid.second;
+    bidder = firstPlayer;
   }
 
-  Suit getBidSuit() => bidSuit;
+  Suit getTrump() => trump;
 
   bool determineIfWonBidAndDeduct() {
-    if (playerScores[bidder] - bidAmount < bidderInitialScore) {
-      playerScores[bidder] = bidderInitialScore - bidAmount;
+    if (bidder == null) {
+      throw ArgumentError("bidder should not be null");
+    } else if (bidAmount == null) {
+      throw ArgumentError("bidAmount should not be null");
+    }
+
+    // if the player lost the bid, then deduct the bid from their hand
+    if (playerScoresThisHand[bidder !% 2] < bidAmount!) {
+      playerScores[bidder!] -= bidAmount!;
       return false;
     }
     return true;
@@ -175,35 +171,38 @@ class X45s {
   }
 
   List<Card> havePlayersPlayCards(int playerLeading) {
-    final cardsPlayed = List<Card>.filled(4, Card(Suit.aceOfHearts, 0));
-    cardsPlayed[playerLeading % 4] = players[playerLeading % 4].playCard(cardsPlayed);
+    final cardsPlayed = List<Card>.filled(4, Card(value: -1000, suit: Suit.INVALID));
 
-    final gameState = GameState.instance;
-    gameState.setSuitLed(cardsPlayed[playerLeading % 4].suit);
-    if (gameState.getSuitLed() == Suit.aceOfHearts) {
-      gameState.setSuitLed(gameState.getTrump());
+    // get the first card, where suitLed is not initalized
+    cardsPlayed[playerLeading % 4] = players[playerLeading % 4].playCard(cardsPlayed, Suit.INVALID, trump);
+
+    suitLed = cardsPlayed[playerLeading % 4].suit;
+
+    // there is the case where the card's suit is the Ace of Hearts, when suitLed is set to trump
+    if (suitLed == Suit.ACE_OF_HEARTS) {
+      suitLed = trump;
     }
-    for (int cardNum = ++playerLeading; cardNum < 4 + playerLeading; cardNum++) {
-      cardsPlayed[playerLeading % 4] =
-          players[cardNum % 4].playCard(cardsPlayed);
+    for (int i = ++playerLeading % 4; i < (4 + playerLeading) % 4; i++) {
+      cardsPlayed[i % 4] = players[i % 4].playCard(cardsPlayed, suitLed, trump);
     }
     return cardsPlayed;
   }
 
-  Pair<Card, int> havePlayersPlayCardsAndEvaluate(int playerLeading) 
+  // returns WinningCard, WinningPlayer
+  Pair<Card, int> havePlayersPlayCardsAndEvaluate(int playerLeading) {
     final cardsPlayed = List<Card>.filled(4, Card(value: -1000, suit: Suit.INVALID));
 
-    cardsPlayed[playerLeading % 4] = players[playerLeading % 4].playCard(cardsPlayed);
+    // get the first card, where suitLed is not initalized
+    cardsPlayed[playerLeading % 4] = players[playerLeading % 4].playCard(cardsPlayed, Suit.INVALID, trump);
 
-    final gameState = GameState.instance;
-    gameState.setSuitLed(cardsPlayed[playerLeading % 4].suit);
+    suitLed = cardsPlayed[playerLeading % 4].suit;
 
-    if (gameState.getSuitLed() == Suit.ACE_OF_HEARTS) {
-      gameState.setSuitLed(gameState.getTrump());
+    // there is the case where the card's suit is the Ace of Hearts, when suitLed is set to trump
+    if (suitLed == Suit.ACE_OF_HEARTS) {
+      suitLed = trump;
     }
-
-    for (int cardNum = ++playerLeading; cardNum < 4 + playerLeading; cardNum++) {
-      cardsPlayed[playerLeading % 4] = players[cardNum % 4].playCard(cardsPlayed);
+    for (int i = ++playerLeading % 4; i < (4 + playerLeading) % 4; i++) {
+      cardsPlayed[i % 4] = players[i % 4].playCard(cardsPlayed, suitLed, trump);
     }
 
     final winningCard = evaluateTrickList(cardsPlayed);
@@ -214,9 +213,17 @@ class X45s {
       winningPlayer = 1;
     } else if (winningCard == cardsPlayed[2]) {
       winningPlayer = 2;
-    } else {
+    } else if (winningCard == cardsPlayed[3]){
       winningPlayer = 3;
+    } else {
+      throw UnsupportedError("cardsPlayed should be in the range 0 to 3 inclusive");
     }
-      return Pair(winningCard, winningPlayer);
+    return Pair(winningCard, winningPlayer);
+  }
+
+  void havePlayersDiscard() {
+    for (var e in players) {
+      e.discard();
+    }
   }
 }

@@ -44,6 +44,9 @@ class Card {
   }
 
   bool lessThan(Card other, Suit suitLed, Suit trump) {
+    if (trump != Suit.CLUBS && trump != Suit.SPADES && trump != Suit.HEARTS && trump != Suit.DIAMONDS) {
+      throw ArgumentError("trump is not valid!");
+    }
     List<int> hearts = [5, 11, 0xACE, 13, 12, 10, 9, 8, 7, 6, 4, 3, 2, -10];
     List<int> diamonds = [5, 11, 0xACE, 1, 13, 12, 10, 9, 8, 7, 6, 4, 3, 2];
     List<int> clubsAndSpades = [5, 11, 0xACE, 1, 13, 12, 2, 3, 4, 6, 7, 8, 9, 10];
@@ -94,7 +97,7 @@ class Card {
   }
 
     bool evaluateOffSuit(Card other, Suit inpSuit) {
-        if (inpSuit != 0 && inpSuit != 1 && inpSuit != 2 && inpSuit != 3) {
+        if (inpSuit != Suit.CLUBS && inpSuit != Suit.SPADES && inpSuit != Suit.HEARTS && inpSuit != Suit.DIAMONDS) {
             throw ArgumentError("suitLed is not valid!");
         }
 
