@@ -238,7 +238,9 @@ class X45s {
     if (bidAmount == null ||
         bidder == null ||
         trump == Suit.INVALID ||
-        trump == Suit.ACE_OF_HEARTS) {}
+        trump == Suit.ACE_OF_HEARTS) {
+      throw ArgumentError("Variables are null that shouldn't be");
+    }
     for (var e in players) {
       e.discard(bidder!, bidAmount!, trump);
     }
