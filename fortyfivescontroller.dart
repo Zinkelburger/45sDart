@@ -21,11 +21,16 @@ class X45s {
     playerDealing = 0;
   }
 
-  X45s.withFunctions(
-      Player Function() cp1,
-      Player Function() cp2,
-      Player Function() cp3,
-      Player Function() cp4) {
+  // when all 4 players are the same, sometimes you just want one function
+  // can be called like X45s.withFunction(() => Player());
+  X45s.withOneFunction(Player Function() createPlayer) {
+    players.addAll(
+        [createPlayer(), createPlayer(), createPlayer(), createPlayer()]);
+    playerDealing = 0;
+  }
+
+  X45s.withDifferentFunctions(Player Function() cp1, Player Function() cp2,
+      Player Function() cp3, Player Function() cp4) {
     players.addAll([cp1(), cp2(), cp3(), cp4()]);
     playerDealing = 0;
   }
@@ -56,11 +61,13 @@ class X45s {
 
   Card evaluateTrick(Card card1, Card card2, Card card3, Card card4) {
     final cards = [card1, card2, card3, card4];
-    return cards.reduce((value, element) => value.lessThan(element, suitLed, trump) ? value : element);
+    return cards.reduce((value, element) =>
+        value.lessThan(element, suitLed, trump) ? value : element);
   }
 
   Card evaluateTrickList(List<Card> cards) {
-    return cards.reduce((value, element) => value.lessThan(element, suitLed, trump) ? value : element);
+    return cards.reduce((value, element) =>
+        value.lessThan(element, suitLed, trump) ? value : element);
   }
 
   void updateScores(int player) {
@@ -79,7 +86,7 @@ class X45s {
     return playerScores[player];
   }
 
-  bool hasWon() => playerScores[0] >=120 || playerScores[1] >= 120;
+  bool hasWon() => playerScores[0] >= 120 || playerScores[1] >= 120;
 
   int? getBidAmount() => bidAmount;
 
@@ -88,7 +95,7 @@ class X45s {
 
     getBidder();
     dealKiddie();
-  
+
     havePlayersDiscard();
 
     dealPlayers();
@@ -103,7 +110,8 @@ class X45s {
       trickWinner = winnerAndCard.second;
 
       // if the winning card is bigger than the high card, set the high card to the winning card
-      if (i == 0 || highCard.first.lessThan(winnerAndCard.first, suitLed, trump)) {
+      if (i == 0 ||
+          highCard.first.lessThan(winnerAndCard.first, suitLed, trump)) {
         highCard = winnerAndCard;
       }
     }
@@ -156,7 +164,7 @@ class X45s {
     }
 
     // if the player lost the bid, then deduct the bid from their hand
-    if (playerScoresThisHand[bidder !% 2] < bidAmount!) {
+    if (playerScoresThisHand[bidder! % 2] < bidAmount!) {
       playerScores[bidder!] -= bidAmount!;
       return false;
     }
@@ -171,10 +179,12 @@ class X45s {
   }
 
   List<Card> havePlayersPlayCards(int playerLeading) {
-    final cardsPlayed = List<Card>.filled(4, Card(value: -1000, suit: Suit.INVALID));
+    final cardsPlayed =
+        List<Card>.filled(4, Card(value: -1000, suit: Suit.INVALID));
 
     // get the first card, where suitLed is not initalized
-    cardsPlayed[playerLeading % 4] = players[playerLeading % 4].playCard(cardsPlayed, Suit.INVALID, trump);
+    cardsPlayed[playerLeading % 4] =
+        players[playerLeading % 4].playCard(cardsPlayed, Suit.INVALID, trump);
 
     suitLed = cardsPlayed[playerLeading % 4].suit;
 
@@ -190,10 +200,12 @@ class X45s {
 
   // returns WinningCard, WinningPlayer
   Pair<Card, int> havePlayersPlayCardsAndEvaluate(int playerLeading) {
-    final cardsPlayed = List<Card>.filled(4, Card(value: -1000, suit: Suit.INVALID));
+    final cardsPlayed =
+        List<Card>.filled(4, Card(value: -1000, suit: Suit.INVALID));
 
     // get the first card, where suitLed is not initalized
-    cardsPlayed[playerLeading % 4] = players[playerLeading % 4].playCard(cardsPlayed, Suit.INVALID, trump);
+    cardsPlayed[playerLeading % 4] =
+        players[playerLeading % 4].playCard(cardsPlayed, Suit.INVALID, trump);
 
     suitLed = cardsPlayed[playerLeading % 4].suit;
 
@@ -213,10 +225,11 @@ class X45s {
       winningPlayer = 1;
     } else if (winningCard == cardsPlayed[2]) {
       winningPlayer = 2;
-    } else if (winningCard == cardsPlayed[3]){
+    } else if (winningCard == cardsPlayed[3]) {
       winningPlayer = 3;
     } else {
-      throw UnsupportedError("cardsPlayed should be in the range 0 to 3 inclusive");
+      throw UnsupportedError(
+          "cardsPlayed should be in the range 0 to 3 inclusive");
     }
     return Pair(winningCard, winningPlayer);
   }
