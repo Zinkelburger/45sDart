@@ -8,11 +8,10 @@ class Deck {
   Deck() {
     // Initialize 52 cards, Hearts = 1, Diamonds = 2, Clubs = 3, Spades = 4
     // there is no ++ for enum types, which is dumb
-    for (Suit i = Suit.HEARTS; i.index <= Suit.SPADES.index;
-    i = Suit.values[(i.index + 1) % Suit.values.length]) {
-        for (int j = 1; j < 14; j++) {
-            pack.add(Card(value: j, suit: i));
-        }
+    for (int i = 2; i <= 5; i++) {
+      for (int j = 1; j < 14; j++) {
+        pack.add(Card(value: j, suit: Suit.values[i]));
+      }
     }
     // Set the ace of hearts to its special suit
     pack[0].suit = Suit.ACE_OF_HEARTS;
@@ -24,10 +23,10 @@ class Deck {
     int seed = DateTime.now().millisecondsSinceEpoch;
     Random random = Random(seed);
     for (int i = pack.length - 1; i > 0; i--) {
-        int j = random.nextInt(i + 1);
-        Card c = pack[j];
-        pack[j] = pack[i];
-        pack[i] = c;
+      int j = random.nextInt(i + 1);
+      Card c = pack[j];
+      pack[j] = pack[i];
+      pack[i] = c;
     }
   }
 
@@ -36,12 +35,12 @@ class Deck {
     int seed = DateTime.now().millisecondsSinceEpoch;
     Random random = Random(seed);
     for (int j = 0; j < times; j++) {
-        for (int i = 0; i < pack.length; i++) {
-            int randomIndex = random.nextInt(pack.length);
-            Card c = pack[randomIndex];
-            pack[randomIndex] = pack[i];
-            pack[i] = c;
-        }
+      for (int i = 0; i < pack.length; i++) {
+        int randomIndex = random.nextInt(pack.length);
+        Card c = pack[randomIndex];
+        pack[randomIndex] = pack[i];
+        pack[i] = c;
+      }
     }
   }
 
@@ -65,8 +64,9 @@ class Deck {
   void reset() {
     // Clear the deck and reinitialize it with 52 cards
     pack.clear();
-    for (Suit i = Suit.HEARTS; i.index <= Suit.SPADES.index;
-    i = Suit.values[(i.index + 1) % Suit.values.length]) {
+    for (Suit i = Suit.HEARTS;
+        i.index <= Suit.SPADES.index;
+        i = Suit.values[(i.index + 1) % Suit.values.length]) {
       for (int j = 1; j < 14; j++) {
         pack.add(Card(value: j, suit: i));
       }
@@ -78,46 +78,45 @@ class Deck {
 
   void removeCard(Card c) {
     // Linear search the deck until you find the card, then remove it
-    int? indexToRemove = null;
+    int? indexToRemove;
     for (int i = 0; i < pack.length; i++) {
-        if (pack[i].suit == c.suit && pack[i].value == c.value) {
-        indexToRemove=i;
+      if (pack[i].suit == c.suit && pack[i].value == c.value) {
+        indexToRemove = i;
         break;
-        }
+      }
     }
 
     if (indexToRemove == null) {
-        throw ArgumentError("Invalid value, suit pair passed to removeCard: " +
-        c.value.toString() + ", " + c.suit.toString() + "\n");
+      throw ArgumentError("Invalid Card passed to removeCard");
     } else {
-        pack.removeAt(indexToRemove);
+      pack.removeAt(indexToRemove);
     }
   }
 
-  void removeCardByValueAndSuit(int value, int suit) {
-     // Linear search the deck until you find the card, then remove it
-     int? indexToRemove = null;
-     for (int i = 0; i < pack.length; i++) {
-        if (pack[i].suit == suit && pack[i].value == value) {
-            indexToRemove=i;
-            break;
-        }
-     }
-     
-     if (indexToRemove == null) {
-       throw ArgumentError("Invalid value, suit pair passed to removeCard: " +
-        value.toString() + ", " + suit.toString() + "\n");
-     } else {
-        pack.removeAt(indexToRemove);
-     }
+  void removeCardByValueAndSuit(int value, Suit suit) {
+    // Linear search the deck until you find the card, then remove it
+    int? indexToRemove;
+    for (int i = 0; i < pack.length; i++) {
+      if (pack[i].suit == suit && pack[i].value == value) {
+        indexToRemove = i;
+        break;
+      }
+    }
+
+    if (indexToRemove == null) {
+      throw ArgumentError(
+          "Invalid value, suit pair passed to removeCard: ${value.toString()}, $suit");
+    } else {
+      pack.removeAt(indexToRemove);
+    }
   }
 
-  bool containsCard(int value, int suit) {
+  bool containsCard(int value, Suit suit) {
     // Linear search the deck until you find the card
     for (int i = 0; i < pack.length; i++) {
-        if (pack[i].suit == suit && pack[i].value == value) {
-            return true;
-        }
+      if (pack[i].suit == suit && pack[i].value == value) {
+        return true;
+      }
     }
     return false;
   }
@@ -127,7 +126,7 @@ class Deck {
     // Return a string representation of the deck
     String result = "";
     for (int i = 0; i < pack.length; i++) {
-        result += pack[i].toString() + " ";
+      result += pack[i].toString() + " ";
     }
     return result;
   }

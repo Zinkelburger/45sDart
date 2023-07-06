@@ -11,8 +11,8 @@ class X45s {
   List<int> playerScoresThisHand = [0, 0];
   List<int> bidHistory = [];
   int playerDealing = 0;
-  int? bidAmount = null;
-  int? bidder = null;
+  int? bidAmount;
+  int? bidder;
   Suit trump = Suit.INVALID;
   Suit suitLed = Suit.INVALID;
 
@@ -127,7 +127,7 @@ class X45s {
     bidHistory.clear();
     Pair<int, Suit> currentBid;
     var maxBid = Pair<int, Suit>(0, Suit.INVALID);
-    int? firstPlayer = null;
+    int? firstPlayer;
 
     for (int i = playerDealing; i < playerDealing + 3; i++) {
       currentBid = players[i % 4].getBid(bidHistory);
@@ -182,7 +182,7 @@ class X45s {
     final cardsPlayed =
         List<Card>.filled(4, Card(value: -1000, suit: Suit.INVALID));
 
-    // get the first card, where suitLed is not initalized
+    // get the first card, where suitLed is not initialized
     cardsPlayed[playerLeading % 4] =
         players[playerLeading % 4].playCard(cardsPlayed, Suit.INVALID, trump);
 
@@ -203,7 +203,7 @@ class X45s {
     final cardsPlayed =
         List<Card>.filled(4, Card(value: -1000, suit: Suit.INVALID));
 
-    // get the first card, where suitLed is not initalized
+    // get the first card, where suitLed is not initialized
     cardsPlayed[playerLeading % 4] =
         players[playerLeading % 4].playCard(cardsPlayed, Suit.INVALID, trump);
 
