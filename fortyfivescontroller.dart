@@ -235,8 +235,12 @@ class X45s {
   }
 
   void havePlayersDiscard() {
+    if (bidAmount == null ||
+        bidder == null ||
+        trump == Suit.INVALID ||
+        trump == Suit.ACE_OF_HEARTS) {}
     for (var e in players) {
-      e.discard();
+      e.discard(bidder!, bidAmount!, trump);
     }
   }
 }

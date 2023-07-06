@@ -22,7 +22,7 @@ abstract class Player {
   }
 
   // The player must keep at least 1 card
-  void discard();
+  void discard(int playerLeading, int bidAmount, Suit trump);
 
   // Returns the player's bid as a pair of bidAmount and suit
   Pair<int, Suit> getBid(List<int> bidHistory);
