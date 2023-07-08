@@ -27,7 +27,7 @@ abstract class Player {
   Future<void> discard(int playerLeading, int bidAmount, Suit trump);
 
   // Returns the player's bid as a pair of bidAmount and suit
-  Pair<int, Suit> getBid(List<int> bidHistory);
+  Future<Pair<int, Suit>> getBid(List<int> bidHistory);
 
   // The player is forced to bid
   Suit bagged();

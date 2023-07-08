@@ -127,14 +127,14 @@ class X45s {
 
   // gets the bids of all 4 players. If none bid, then bag the dealer
   // postcondition: playerDealing++, bidAmount, trump, and bidder are set.
-  void getBidder() {
+  Future<void> getBidder() async {
     bidHistory.clear();
     Pair<int, Suit> currentBid;
     var maxBid = Pair<int, Suit>(0, Suit.INVALID);
     int? firstPlayer;
 
     for (int i = playerDealing; i < playerDealing + 3; i++) {
-      currentBid = players[i % 4].getBid(bidHistory);
+      currentBid = await players[i % 4].getBid(bidHistory);
       if (currentBid.first != 0) {
         bidHistory.add(currentBid.first);
         if (currentBid.first > maxBid.first) {
