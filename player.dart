@@ -7,12 +7,14 @@ import 'pair.dart';
 abstract class Player {
   // The player's hand of cards
   List<Card> hand = [];
+  // the player's number
+  final int playerNumber;
 
   // Default constructor
-  Player();
+  Player({required this.playerNumber});
 
-  // Constructor that takes a list of cards
-  Player.fromCards(List<Card> cards) {
+  // Constructor that takes a list of cards and a player number
+  Player.fromCards({required List<Card> cards, required this.playerNumber}) {
     hand = cards;
   }
 
@@ -22,7 +24,7 @@ abstract class Player {
   }
 
   // The player must keep at least 1 card
-  void discard(int playerLeading, int bidAmount, Suit trump);
+  Future<void> discard(int playerLeading, int bidAmount, Suit trump);
 
   // Returns the player's bid as a pair of bidAmount and suit
   Pair<int, Suit> getBid(List<int> bidHistory);

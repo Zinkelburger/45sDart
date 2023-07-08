@@ -23,15 +23,19 @@ class X45s {
 
   // when all 4 players are the same, sometimes you just want one function
   // can be called like X45s.withFunction(() => Player());
-  X45s.withOneFunction(Player Function() createPlayer) {
-    players.addAll(
-        [createPlayer(), createPlayer(), createPlayer(), createPlayer()]);
+  X45s.withOneFunction(Player Function(int playerNumber) createPlayer) {
+    for (int i = 1; i <= 4; i++) {
+      players.add(createPlayer(i));
+    }
     playerDealing = 0;
   }
 
-  X45s.withDifferentFunctions(Player Function() cp1, Player Function() cp2,
-      Player Function() cp3, Player Function() cp4) {
-    players.addAll([cp1(), cp2(), cp3(), cp4()]);
+  X45s.withDifferentFunctions(
+      Player Function(int playerNumber) cp1,
+      Player Function(int playerNumber) cp2,
+      Player Function(int playerNumber) cp3,
+      Player Function(int playerNumber) cp4) {
+    players.addAll([cp1(1), cp2(2), cp3(3), cp4(4)]);
     playerDealing = 0;
   }
 
@@ -109,7 +113,7 @@ class X45s {
       final winnerAndCard = havePlayersPlayCardsAndEvaluate(trickWinner);
       trickWinner = winnerAndCard.second;
 
-      // if the winning card is bigger than the high card, set the high card to the winning card
+      // sometimes set the high card to the winning card
       if (i == 0 ||
           highCard.first.lessThan(winnerAndCard.first, suitLed, trump)) {
         highCard = winnerAndCard;
@@ -122,7 +126,7 @@ class X45s {
   }
 
   // gets the bids of all 4 players. If none bid, then bag the dealer
-  // postconditions: playerDealing is incremented. bidAmount, trump, and bidder are set.
+  // postcondition: playerDealing++, bidAmount, trump, and bidder are set.
   void getBidder() {
     bidHistory.clear();
     Pair<int, Suit> currentBid;
@@ -188,7 +192,8 @@ class X45s {
 
     suitLed = cardsPlayed[playerLeading % 4].suit;
 
-    // there is the case where the card's suit is the Ace of Hearts, when suitLed is set to trump
+    // there is the case where the card's suit is the Ace of Hearts
+    // when suitLed is set to trump
     if (suitLed == Suit.ACE_OF_HEARTS) {
       suitLed = trump;
     }
@@ -209,7 +214,8 @@ class X45s {
 
     suitLed = cardsPlayed[playerLeading % 4].suit;
 
-    // there is the case where the card's suit is the Ace of Hearts, when suitLed is set to trump
+    // there is the case where the card's suit is the Ace of Hearts
+    // when suitLed is set to trump
     if (suitLed == Suit.ACE_OF_HEARTS) {
       suitLed = trump;
     }
@@ -234,7 +240,7 @@ class X45s {
     return Pair(winningCard, winningPlayer);
   }
 
-  void havePlayersDiscard() {
+  Future<void> havePlayersDiscard() async {
     if (bidAmount == null ||
         bidder == null ||
         trump == Suit.INVALID ||
@@ -242,7 +248,7 @@ class X45s {
       throw ArgumentError("Variables are null that shouldn't be");
     }
     for (var e in players) {
-      e.discard(bidder!, bidAmount!, trump);
+      await e.discard(bidder!, bidAmount!, trump);
     }
   }
 }
