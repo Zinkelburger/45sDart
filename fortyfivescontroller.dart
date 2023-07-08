@@ -9,7 +9,8 @@ class X45s {
   Deck deck = Deck();
   List<int> playerScores = [0, 0];
   List<int> playerScoresThisHand = [0, 0];
-  List<int> bidHistory = [];
+  // bidHistory is bidAmount, playerNumber
+  List<Pair<int, int>> bidHistory = [];
   int playerDealing = 0;
   int? bidAmount;
   int? bidder;
@@ -94,7 +95,7 @@ class X45s {
 
   int? getBidAmount() => bidAmount;
 
-  Pair<int, bool> dealBidAndFullFiveTricks() {
+  Future<Pair<int, bool>> dealBidAndFullFiveTricks() async {
     dealPlayers();
 
     getBidder();
@@ -110,7 +111,7 @@ class X45s {
     int trickWinner = bidder!;
     // all 5 tricks
     for (int i = 0; i < 5; i++) {
-      final winnerAndCard = havePlayersPlayCardsAndEvaluate(trickWinner);
+      final winnerAndCard = await havePlayersPlayCardsAndEvaluate(trickWinner);
       trickWinner = winnerAndCard.second;
 
       // sometimes set the high card to the winning card
@@ -133,10 +134,11 @@ class X45s {
     var maxBid = Pair<int, Suit>(0, Suit.INVALID);
     int? firstPlayer;
 
-    for (int i = playerDealing; i < playerDealing + 3; i++) {
+    // get the bids for the players besides the dealer
+    for (int i = playerDealing + 1; i < playerDealing + 4; i++) {
       currentBid = await players[i % 4].getBid(bidHistory);
       if (currentBid.first != 0) {
-        bidHistory.add(currentBid.first);
+        bidHistory.add(Pair(currentBid.first, (i + 1)));
         if (currentBid.first > maxBid.first) {
           maxBid = currentBid;
           firstPlayer = i;
@@ -144,10 +146,20 @@ class X45s {
       }
     }
 
-    // bags the dealer in this case
+    // check if you have to bag the dealer
     if (maxBid.first <= 0) {
-      currentBid = Pair(15, players[playerDealing].bagged());
+      currentBid = Pair(15, await players[playerDealing].bagged());
       firstPlayer = playerDealing;
+    } else {
+      // otherwise the dealer can choose to bid
+      currentBid = await players[playerDealing].getBid(bidHistory);
+      if (currentBid.first != 0) {
+        bidHistory.add(Pair(currentBid.first, playerDealing));
+        if (currentBid.first > maxBid.first) {
+          maxBid = currentBid;
+          firstPlayer = playerDealing;
+        }
+      }
     }
 
     playerDealing++;
@@ -182,13 +194,13 @@ class X45s {
     deck.reset();
   }
 
-  List<Card> havePlayersPlayCards(int playerLeading) {
+  Future<List<Card>> havePlayersPlayCards(int playerLeading) async {
     final cardsPlayed =
         List<Card>.filled(4, Card(value: -1000, suit: Suit.INVALID));
 
     // get the first card, where suitLed is not initialized
-    cardsPlayed[playerLeading % 4] =
-        players[playerLeading % 4].playCard(cardsPlayed, Suit.INVALID, trump);
+    cardsPlayed[playerLeading % 4] = await players[playerLeading % 4]
+        .playCard(cardsPlayed, Suit.INVALID, trump);
 
     suitLed = cardsPlayed[playerLeading % 4].suit;
 
@@ -198,19 +210,21 @@ class X45s {
       suitLed = trump;
     }
     for (int i = ++playerLeading % 4; i < (4 + playerLeading) % 4; i++) {
-      cardsPlayed[i % 4] = players[i % 4].playCard(cardsPlayed, suitLed, trump);
+      cardsPlayed[i % 4] =
+          await players[i % 4].playCard(cardsPlayed, suitLed, trump);
     }
     return cardsPlayed;
   }
 
   // returns WinningCard, WinningPlayer
-  Pair<Card, int> havePlayersPlayCardsAndEvaluate(int playerLeading) {
+  Future<Pair<Card, int>> havePlayersPlayCardsAndEvaluate(
+      int playerLeading) async {
     final cardsPlayed =
         List<Card>.filled(4, Card(value: -1000, suit: Suit.INVALID));
 
     // get the first card, where suitLed is not initialized
-    cardsPlayed[playerLeading % 4] =
-        players[playerLeading % 4].playCard(cardsPlayed, Suit.INVALID, trump);
+    cardsPlayed[playerLeading % 4] = await players[playerLeading % 4]
+        .playCard(cardsPlayed, Suit.INVALID, trump);
 
     suitLed = cardsPlayed[playerLeading % 4].suit;
 
@@ -220,7 +234,8 @@ class X45s {
       suitLed = trump;
     }
     for (int i = ++playerLeading % 4; i < (4 + playerLeading) % 4; i++) {
-      cardsPlayed[i % 4] = players[i % 4].playCard(cardsPlayed, suitLed, trump);
+      cardsPlayed[i % 4] =
+          await players[i % 4].playCard(cardsPlayed, suitLed, trump);
     }
 
     final winningCard = evaluateTrickList(cardsPlayed);

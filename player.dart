@@ -27,13 +27,14 @@ abstract class Player {
   Future<void> discard(int playerLeading, int bidAmount, Suit trump);
 
   // Returns the player's bid as a pair of bidAmount and suit
-  Future<Pair<int, Suit>> getBid(List<int> bidHistory);
+  Future<Pair<int, Suit>> getBid(List<Pair<int, int>> bidHistory);
 
   // The player is forced to bid
-  Suit bagged();
+  Future<Suit> bagged();
 
   // Returns the card the player wants to play and removes it from their hand
-  Card playCard(List<Card> cardsPlayedThisHand, Suit suitLed, Suit trump);
+  Future<Card> playCard(
+      List<Card> cardsPlayedThisHand, Suit suitLed, Suit trump);
 
   // Returns the size of the player's hand
   int getSize() {
