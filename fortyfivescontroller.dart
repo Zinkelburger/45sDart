@@ -96,12 +96,13 @@ class X45s {
   int? getBidAmount() => bidAmount;
 
   Future<Pair<int, bool>> dealBidAndFullFiveTricks() async {
+    shuffle();
     dealPlayers();
 
-    getBidder();
+    await getBidder();
     dealKiddie();
 
-    havePlayersDiscard();
+    await havePlayersDiscard();
 
     dealPlayers();
 

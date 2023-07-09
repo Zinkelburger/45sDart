@@ -82,19 +82,19 @@ abstract class Player {
 
     // you can always play trump if you want.
     for (Card card in hand) {
-      if (card.suit == trump) {
+      if (card.suit == trump || card.suit == Suit.ACE_OF_HEARTS) {
         legalCards.add(card);
       }
     }
 
     // reneging is rare so I try to check it less often by putting conditions
-    if (legalCards.length > 0 && legalCards.length <= 3) {
+    if (legalCards.isNotEmpty && legalCards.length <= 3) {
       List<Card> renegableCards = [
         Card(value: 5, suit: trump),
         Card(value: 11, suit: trump),
         Card(value: 0xACE, suit: Suit.ACE_OF_HEARTS)
       ];
-      // if the 5 is led, then you can't reneg
+      // if the 5 is led, then you can't renege
       if (cardLed == Card(value: 5, suit: trump)) {
         renegableCards.clear();
         // if the jack is led, then the ace of hearts can't be reneged
@@ -103,10 +103,7 @@ abstract class Player {
       }
 
       // # of trump == the number of renegableCards, then you can reneg the cards
-      if (legalCards
-              .where((element) => renegableCards.contains(element))
-              .length ==
-          legalCards.length) {
+      if (legalCards.every((element) => renegableCards.contains(element))) {
         return hand;
       }
     }
