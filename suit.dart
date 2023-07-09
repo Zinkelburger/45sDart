@@ -10,7 +10,7 @@ enum Suit {
   SPADES,
 }
 
-// Useful function for Flutter
+/// Useful function for Flutter. Outputs the emoji for a Suit
 TextSpan suitToEmoji(Suit suit) {
   switch (suit) {
     case Suit.ACE_OF_HEARTS:

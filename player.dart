@@ -3,50 +3,51 @@ import 'card.dart';
 import 'suit.dart';
 import 'pair.dart';
 
-// Player is designed to be overridden
+/// Player is designed to be overridden
 abstract class Player {
-  // The player's hand of cards
+  /// The player's hand of cards
   List<Card> hand = [];
   // the player's number
   final int playerNumber;
 
-  // Default constructor
+  /// Default constructor
   Player({required this.playerNumber});
 
-  // Constructor that takes a list of cards and a player number
+  /// Constructor that takes a list of cards and a player number
   Player.fromCards({required List<Card> cards, required this.playerNumber}) {
     hand = cards;
   }
 
-  // Add the card to the player's hand
+  /// Add the card to the player's hand
   void dealCard(Card c) {
     hand.add(c);
   }
 
-  // The player must keep at least 1 card
+  /// The player must keep at least 1 card
   Future<void> discard(int playerLeading, int bidAmount, Suit trump);
 
-  // Returns the player's bid as a pair of bidAmount and suit
+  /// Returns the player's bid as a pair of bidAmount and suit
   Future<Pair<int, Suit>> getBid(List<Pair<int, int>> bidHistory);
 
-  // The player is forced to bid
+  /// The player is forced to bid
   Future<Suit> bagged();
 
-  // Returns the card the player wants to play and removes it from their hand
+  /// Returns the card the player wants to play
+  /// Does not remove it from the player's hand
   Future<Card> playCard(List<Card> cardsPlayedThisHand, Suit suitLed,
       Suit trump, List<Card> legalCards);
 
-  // Returns the size of the player's hand
+  /// Returns the size of the player's hand
   int getSize() {
     return hand.length;
   }
 
-  // Resets the player's hand
+  /// Clears the player's hand
   void resetHand() {
     hand.clear();
   }
 
-  // Prints the player's hand to the console
+  /// Prints the player's hand to the terminal
   void printHand() {
     for (var c in hand) {
       print(c);
@@ -54,7 +55,7 @@ abstract class Player {
     print('\n');
   }
 
-  // Returns a string representation of the player's hand
+  /// Returns a string representation of the player's hand
   String handToString() {
     var out = '';
     for (var c in hand) {
@@ -64,7 +65,7 @@ abstract class Player {
     return out;
   }
 
-  // returns all of the cards you can legally play
+  /// returns all of the cards you can legally play
   List<Card> getLegalMoves(Card cardLed, Suit trump) {
     // if you are the first player, you can play whatever you want
     if (cardLed.suit == Suit.INVALID) {

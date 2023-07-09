@@ -6,6 +6,7 @@ class Card {
 
   Card({this.value = -1000, this.suit = Suit.INVALID});
 
+  /// Checks equality between two cards
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
@@ -16,6 +17,7 @@ class Card {
   @override
   int get hashCode => Object.hash(value, suit);
 
+  /// Returns the card in readable format. E.g. "King of Hearts", "2 of Clubs"
   @override
   String toString() {
     String result = "";
@@ -53,6 +55,7 @@ class Card {
     return result;
   }
 
+  /// suitLed can be Suit.INVALID if both cards are trump
   bool lessThan(Card other, Suit suitLed, Suit trump) {
     if (trump != Suit.CLUBS &&
         trump != Suit.SPADES &&
@@ -62,22 +65,7 @@ class Card {
     }
     List<int> hearts = [5, 11, 0xACE, 13, 12, 10, 9, 8, 7, 6, 4, 3, 2, -10];
     List<int> diamonds = [5, 11, 0xACE, 1, 13, 12, 10, 9, 8, 7, 6, 4, 3, 2];
-    List<int> clubsAndSpades = [
-      5,
-      11,
-      0xACE,
-      1,
-      13,
-      12,
-      2,
-      3,
-      4,
-      6,
-      7,
-      8,
-      9,
-      10
-    ];
+    List<int> clubsSpades = [5, 11, 0xACE, 1, 13, 12, 2, 3, 4, 6, 7, 8, 9, 10];
 
     List<int> order;
 
@@ -104,7 +92,7 @@ class Card {
     } else if (trump == Suit.DIAMONDS) {
       order = diamonds;
     } else {
-      order = clubsAndSpades;
+      order = clubsSpades;
     }
 
     if ((suit == trump || suit == Suit.ACE_OF_HEARTS) &&
@@ -126,6 +114,7 @@ class Card {
     throw UnsupportedError("How the hell did you get here");
   }
 
+  /// Evaluates the cards if neither is trump
   bool evaluateOffSuit(Card other, Suit inpSuit) {
     if (inpSuit != Suit.CLUBS &&
         inpSuit != Suit.SPADES &&

@@ -9,7 +9,8 @@ class X45s {
   Deck deck = Deck();
   List<int> playerScores = [0, 0];
   List<int> playerScoresThisHand = [0, 0];
-  // bidHistory is bidAmount, playerNumber
+
+  /// bidHistory is bidAmount, playerNumber
   List<Pair<int, int>> bidHistory = [];
   int playerDealing = 0;
   int? bidAmount;
@@ -22,8 +23,8 @@ class X45s {
     playerDealing = 0;
   }
 
-  // when all 4 players are the same, sometimes you just want one function
-  // can be called like X45s.withFunction(() => Player());
+  /// when all 4 players are the same, sometimes you just want one function
+  /// can be called like X45s.withFunction(() => Player());
   X45s.withOneFunction(Player Function(int playerNumber) createPlayer) {
     for (int i = 1; i <= 4; i++) {
       players.add(createPlayer(i));
@@ -40,10 +41,12 @@ class X45s {
     playerDealing = 0;
   }
 
+  /// Shuffles the deck 10 times
   void shuffle() {
     deck.shuffleTimes(10);
   }
 
+  /// Deals each player until their hand is 5 cards
   void dealPlayers() {
     for (final player in players) {
       while (player.getSize() < 5) {
@@ -53,6 +56,7 @@ class X45s {
     }
   }
 
+  /// Deals the kiddie to the bidder
   void dealKiddie() {
     if (bidder! < 0 || bidder! > 3 || bidder == null) {
       throw ArgumentError(
@@ -64,37 +68,44 @@ class X45s {
     }
   }
 
+  /// Returns the best card
   Card evaluateTrick(Card card1, Card card2, Card card3, Card card4) {
     final cards = [card1, card2, card3, card4];
     return cards.reduce((value, element) =>
         value.lessThan(element, suitLed, trump) ? element : value);
   }
 
+  /// Returns the best card from the list
   Card evaluateTrickList(List<Card> cards) {
     return cards.reduce((value, element) =>
         value.lessThan(element, suitLed, trump) ? element : value);
   }
 
-  void updateScores(int player) {
-    if (player != 0 && player != 1) {
+  /// Increments the team's score by 5 (team is either 0 or 1)
+  void updateScores(int team) {
+    if (team != 0 && team != 1) {
       throw ArgumentError(
-          'Invalid player $player in updateScores. Must be 0 or 1');
+          'Invalid player $team in updateScores. Must be 0 or 1');
     }
-    playerScoresThisHand[player] += 5;
+    playerScoresThisHand[team] += 5;
   }
 
-  int getTeamScore(int player) {
-    if (player != 0 && player != 1) {
+  /// Returns the score of team 0 or 1
+  int getTeamScore(int team) {
+    if (team != 0 && team != 1) {
       throw ArgumentError(
-          'Invalid player $player in updateScores. Must be 0 or 1');
+          'Invalid player $team in updateScores. Must be 0 or 1');
     }
-    return playerScores[player];
+    return playerScores[team];
   }
 
+  /// Returns whether either team has more than 120 points
   bool hasWon() => playerScores[0] >= 120 || playerScores[1] >= 120;
 
+  /// Returns the amount bid
   int? getBidAmount() => bidAmount;
 
+  /// One full turn of the game. Returns the bidder and whether they won
   Future<Pair<int, bool>> dealBidAndFullFiveTricks() async {
     shuffle();
     dealPlayers();
@@ -130,8 +141,8 @@ class X45s {
     return Pair(bidder!, determineIfWonBidAndDeduct());
   }
 
-  // gets the bids of all 4 players. If none bid, then bag the dealer
-  // postcondition: playerDealing++, bidAmount, trump, and bidder are set.
+  /// gets the bids of all 4 players. If no one bid, then bag the dealer
+  /// Postcondition: playerDealing++, bidAmount, trump, and bidder are set.
   Future<void> getBidder() async {
     bidHistory.clear();
     Pair<int, Suit> currentBid;
@@ -174,8 +185,11 @@ class X45s {
     bidder = firstPlayer;
   }
 
+  /// Returns the trump (as a Suit)
   Suit getTrump() => trump;
 
+  /// Returns whether or not the player won their bid
+  /// Calculates the updated scores with this information
   bool determineIfWonBidAndDeduct() {
     if (bidder == null) {
       throw ArgumentError("bidder should not be null");
@@ -189,8 +203,6 @@ class X45s {
       playerScores[bidder!] -= bidAmount!;
       // give the opposing team their points
       playerScores[bidder! + 1 % 2] = playerScoresThisHand[bidder! + 1 % 2];
-      // reset playerScoresThisHand to 0, 0
-      playerScoresThisHand = [0, 0];
       return false;
     }
     // give the winning team their points
@@ -198,18 +210,23 @@ class X45s {
     // give the opposing team their points
     playerScores[bidder! + 1 % 2] = playerScoresThisHand[bidder! + 1 % 2];
 
-    // reset playerScoresThisHand to 0, 0
-    playerScoresThisHand = [0, 0];
     return true;
   }
 
+  /// Resets the players, deck, and other member variables
   void reset() {
     for (final player in players) {
       player.resetHand();
     }
     deck.reset();
+    playerScoresThisHand = [0, 0];
+    bidAmount = null;
+    bidder = null;
+    trump = Suit.INVALID;
+    suitLed = Suit.INVALID;
   }
 
+  /// Has all the players play their cards and returns the list of the cards
   Future<List<Card>> havePlayersPlayCards() async {
     int playerLeading = bidder!;
 
@@ -247,7 +264,7 @@ class X45s {
     return cardsPlayed;
   }
 
-  // returns WinningCard, WinningPlayer
+  /// returns WinningCard, WinningPlayer
   Future<Pair<Card, int>> havePlayersPlayCardsAndEvaluate(
       int playerLeading) async {
     final cardsPlayed =
@@ -299,6 +316,7 @@ class X45s {
     return Pair(winningCard, winningPlayer);
   }
 
+  /// Calls the discard method for each of the players
   Future<void> havePlayersDiscard() async {
     if (bidAmount == null ||
         bidder == null ||

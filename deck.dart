@@ -5,8 +5,9 @@ import 'suit.dart';
 class Deck {
   List<Card> pack = [];
 
+  /// Initialize 52 cards. Does not shuffle them.
   Deck() {
-    // Initialize 52 cards, Hearts = 1, Diamonds = 2, Clubs = 3, Spades = 4
+    // Hearts = 2, Diamonds = 3, Clubs = 4, Spades = 5
     // there is no ++ for enum types, which is dumb
     for (int i = 2; i <= 5; i++) {
       for (int j = 1; j < 14; j++) {
@@ -18,8 +19,8 @@ class Deck {
     pack[0].value = 0xACE;
   }
 
+  /// Does a Fisher-Yates shuffle
   void shuffle() {
-    // Fisher-Yates shuffle
     int seed = DateTime.now().millisecondsSinceEpoch;
     Random random = Random(seed);
     for (int i = pack.length - 1; i > 0; i--) {
@@ -30,32 +31,32 @@ class Deck {
     }
   }
 
+  /// Shuffles the deck multiple times
   void shuffleTimes(int times) {
-    // Shuffle the deck multiple times
     for (int i = 0; i < times; i++) {
       shuffle();
     }
   }
 
+  /// Removes and returns the last card in the deck
   Card popBack() {
-    // Remove and return the last card in the deck
     Card c = pack.last;
     pack.removeLast();
     return c;
   }
 
+  /// Return the last card in the deck without removing it
   Card peekBack() {
-    // Return the last card in the deck without removing it
     return pack.last;
   }
 
+  /// Adds the card to the end of the deck
   void pushBack(Card c) {
-    // Add a card to the end of the deck
     pack.add(c);
   }
 
+  /// Clears the deck and reinitializes it with 52 cards
   void reset() {
-    // Clear the deck and reinitialize it with 52 cards
     pack.clear();
     for (Suit i = Suit.HEARTS;
         i.index <= Suit.SPADES.index;
@@ -69,8 +70,8 @@ class Deck {
     pack[0].value = 0xACE;
   }
 
+  /// Removes the card from the deck. Error if the card is not in the deck
   void removeCard(Card c) {
-    // Linear search the deck until you find the card, then remove it
     int? indexToRemove;
     for (int i = 0; i < pack.length; i++) {
       if (pack[i].suit == c.suit && pack[i].value == c.value) {
@@ -86,8 +87,8 @@ class Deck {
     }
   }
 
+  /// Removes the card from the deck. Error if the card is not in the deck
   void removeCardByValueAndSuit(int value, Suit suit) {
-    // Linear search the deck until you find the card, then remove it
     int? indexToRemove;
     for (int i = 0; i < pack.length; i++) {
       if (pack[i].suit == suit && pack[i].value == value) {
@@ -104,8 +105,8 @@ class Deck {
     }
   }
 
+  /// Returns True if the card is in the deck, and false otherwise
   bool containsCard(int value, Suit suit) {
-    // Linear search the deck until you find the card
     for (int i = 0; i < pack.length; i++) {
       if (pack[i].suit == suit && pack[i].value == value) {
         return true;
@@ -115,8 +116,9 @@ class Deck {
   }
 
   @override
+
+  /// The Cards separated by spaces
   String toString() {
-    // Return a string representation of the deck
     String result = "";
     for (int i = 0; i < pack.length; i++) {
       result += pack[i].toString() + " ";
