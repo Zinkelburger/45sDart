@@ -201,8 +201,11 @@ class X45s {
         List<Card>.filled(4, Card(value: -1000, suit: Suit.INVALID));
 
     // get the first card, where suitLed is not initialized
-    cardsPlayed[playerLeading % 4] = await players[playerLeading % 4]
-        .playCard(cardsPlayed, Suit.INVALID, trump);
+    cardsPlayed[playerLeading % 4] = await players[playerLeading % 4].playCard(
+        cardsPlayed,
+        Suit.INVALID,
+        trump,
+        players[playerLeading % 4].getLegalMoves(Card(), trump));
 
     suitLed = cardsPlayed[playerLeading % 4].suit;
 
@@ -211,9 +214,14 @@ class X45s {
     if (suitLed == Suit.ACE_OF_HEARTS) {
       suitLed = trump;
     }
-    for (int i = ++playerLeading % 4; i < (4 + playerLeading) % 4; i++) {
-      cardsPlayed[i % 4] =
-          await players[i % 4].playCard(cardsPlayed, suitLed, trump);
+    for (int i = 1; i < 4; i++) {
+      cardsPlayed[(playerLeading + i) % 4] =
+          await players[(playerLeading + i) % 4].playCard(
+              cardsPlayed,
+              suitLed,
+              trump,
+              players[(playerLeading + i) % 4]
+                  .getLegalMoves(cardsPlayed[playerLeading % 4], trump));
     }
     return cardsPlayed;
   }
@@ -225,8 +233,11 @@ class X45s {
         List<Card>.filled(4, Card(value: -1000, suit: Suit.INVALID));
 
     // get the first card, where suitLed is not initialized
-    cardsPlayed[playerLeading % 4] = await players[playerLeading % 4]
-        .playCard(cardsPlayed, Suit.INVALID, trump);
+    cardsPlayed[playerLeading % 4] = await players[playerLeading % 4].playCard(
+        cardsPlayed,
+        Suit.INVALID,
+        trump,
+        players[playerLeading % 4].getLegalMoves(Card(), trump));
 
     suitLed = cardsPlayed[playerLeading % 4].suit;
 
@@ -237,8 +248,12 @@ class X45s {
     }
     for (int i = 1; i < 4; i++) {
       cardsPlayed[(playerLeading + i) % 4] =
-          await players[(playerLeading + i) % 4]
-              .playCard(cardsPlayed, suitLed, trump);
+          await players[(playerLeading + i) % 4].playCard(
+              cardsPlayed,
+              suitLed,
+              trump,
+              players[(playerLeading + i) % 4]
+                  .getLegalMoves(cardsPlayed[playerLeading % 4], trump));
     }
 
     final winningCard = evaluateTrickList(cardsPlayed);
