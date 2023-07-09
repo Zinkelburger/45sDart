@@ -208,6 +208,8 @@ class X45s {
         trump,
         players[playerLeading % 4].getLegalMoves(Card(), trump));
 
+    players[playerLeading % 4].hand.remove(cardsPlayed[playerLeading % 4]);
+
     suitLed = cardsPlayed[playerLeading % 4].suit;
 
     // there is the case where the card's suit is the Ace of Hearts
@@ -223,6 +225,9 @@ class X45s {
               trump,
               players[(playerLeading + i) % 4]
                   .getLegalMoves(cardsPlayed[playerLeading % 4], trump));
+      players[(playerLeading + i) % 4]
+          .hand
+          .remove(cardsPlayed[(playerLeading + i) % 4]);
     }
     return cardsPlayed;
   }
@@ -240,6 +245,8 @@ class X45s {
         trump,
         players[playerLeading % 4].getLegalMoves(Card(), trump));
 
+    players[playerLeading % 4].hand.remove(cardsPlayed[playerLeading % 4]);
+
     suitLed = cardsPlayed[playerLeading % 4].suit;
 
     // there is the case where the card's suit is the Ace of Hearts
@@ -255,6 +262,9 @@ class X45s {
               trump,
               players[(playerLeading + i) % 4]
                   .getLegalMoves(cardsPlayed[playerLeading % 4], trump));
+      players[(playerLeading + i) % 4]
+          .hand
+          .remove(cardsPlayed[(playerLeading + i) % 4]);
     }
 
     final winningCard = evaluateTrickList(cardsPlayed);
