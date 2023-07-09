@@ -7,6 +7,16 @@ class Card {
   Card({this.value = -1000, this.suit = Suit.INVALID});
 
   @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! Card) return false;
+    return value == other.value && suit == other.suit;
+  }
+
+  @override
+  int get hashCode => Object.hash(value, suit);
+
+  @override
   String toString() {
     String result = "";
     if (value == 13) {

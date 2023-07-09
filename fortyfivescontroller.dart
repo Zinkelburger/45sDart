@@ -80,7 +80,7 @@ class X45s {
       throw ArgumentError(
           'Invalid player $player in updateScores. Must be 0 or 1');
     }
-    playerScores[player] += 5;
+    playerScoresThisHand[player] += 5;
   }
 
   int getTeamScore(int player) {
@@ -115,7 +115,10 @@ class X45s {
       final winnerAndCard = await havePlayersPlayCardsAndEvaluate(trickWinner);
       trickWinner = winnerAndCard.second;
 
-      // sometimes set the high card to the winning card
+      // // update the score
+      updateScores(trickWinner % 2);
+
+      // check for the high card
       if (i == 0 ||
           highCard.first.lessThan(winnerAndCard.first, suitLed, trump)) {
         highCard = winnerAndCard;
@@ -182,9 +185,21 @@ class X45s {
 
     // if the player lost the bid, then deduct the bid from their hand
     if (playerScoresThisHand[bidder! % 2] < bidAmount!) {
+      // deduct the bid from the loser's hand
       playerScores[bidder!] -= bidAmount!;
+      // give the opposing team their points
+      playerScores[bidder! + 1 % 2] = playerScoresThisHand[bidder! + 1 % 2];
+      // reset playerScoresThisHand to 0, 0
+      playerScoresThisHand = [0, 0];
       return false;
     }
+    // give the winning team their points
+    playerScores[bidder! + 1 % 2] = playerScoresThisHand[bidder! + 1 % 2];
+    // give the opposing team their points
+    playerScores[bidder! + 1 % 2] = playerScoresThisHand[bidder! + 1 % 2];
+
+    // reset playerScoresThisHand to 0, 0
+    playerScoresThisHand = [0, 0];
     return true;
   }
 

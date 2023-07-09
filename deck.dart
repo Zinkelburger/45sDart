@@ -19,7 +19,7 @@ class Deck {
   }
 
   void shuffle() {
-    // Swap each index of the deck with a random index using the Fisher-Yates shuffle algorithm
+    // Fisher-Yates shuffle
     int seed = DateTime.now().millisecondsSinceEpoch;
     Random random = Random(seed);
     for (int i = pack.length - 1; i > 0; i--) {
@@ -32,15 +32,8 @@ class Deck {
 
   void shuffleTimes(int times) {
     // Shuffle the deck multiple times
-    int seed = DateTime.now().millisecondsSinceEpoch;
-    Random random = Random(seed);
-    for (int j = 0; j < times; j++) {
-      for (int i = 0; i < pack.length; i++) {
-        int randomIndex = random.nextInt(pack.length);
-        Card c = pack[randomIndex];
-        pack[randomIndex] = pack[i];
-        pack[i] = c;
-      }
+    for (int i = 0; i < times; i++) {
+      shuffle();
     }
   }
 
